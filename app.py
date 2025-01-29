@@ -8,7 +8,6 @@ import seaborn as sns
 ###1. Läsa in data från en SQL-databas (Load data from an SQL database)
 connection = sqlite3.connect("Köksglädje.db")
 
-
 # Create connection to database file
 st.subheader("Products")
 products_query = "SELECT * FROM Products;"
@@ -35,14 +34,14 @@ transaction_details_query = "SELECT * FROM TransactionDetails"
 transaction_details = pd.read_sql(transaction_details_query, connection)
 transaction_details
 
-
 # Display the data
 print(transaction_details.head())
 tables_query = "SELECT name FROM sqlite_master WHERE type='table';"
 tables_df = pd.read_sql(tables_query, connection)
 print(tables_df)
 
-###2. Transformera datan i Pandas, om det behövs
+###2. Transformera datan i Pandas 
+#Merging Products with transaction_details data
 st.subheader("Merging Products with transaction_details data")
 df = pd.merge(products, transaction_details, on="ProductID")
 df
@@ -52,38 +51,21 @@ st.subheader("Merging transactions with store data")
 df1 = pd.merge(Transactions_df, Stores_df, on="StoreID")
 df1
 
-
-
-query = '''SELECT ProductName, Price FROM Products
-WHERE CategoryName = "Köksknivar";'''
-df
-df . boxplot(figsize = (15,10))
-
-#float_columns = df.select_dtypes(include='float')
-#print(float_columns)
- 
 # Grouping and analyzing quantity by product
 st.subheader("Grouping and analyzing quantity by product")
 df.groupby("ProductName").Quantity.mean()
-
 query = '''SELECT Productname, Price FROM Products
 WHERE ProductName = "Kockkniv";'''
 print(df)
 df . describe()
-
 # To plot boxplots in Streamlit, you must create a Figure object with plt.gcf()
 fig = plt.gcf()
-
 # Put the boxplot on the Axes object and plot with st.pyplot()
 ax = df.boxplot(figsize = (15,10))
 st.pyplot(fig)
 
-# Checking missing values and data types
-#df . isnull().sum()
-#df.dtypes
 # Checking unique values in the dataset
 df .nunique()
-
 # Query for sales data
 query = """
     SELECT 
@@ -119,15 +101,7 @@ sns.barplot(x=sales_by_store.index, y=sales_by_store.values, ax=ax, color="blue"
 ax.set_title("Total Sales by Store")
 ax.set_xlabel("Store Name")
 ax.set_ylabel("Total Sales ($)")
-plt.xticks(rotation=45)
-
-# Display the customized chart in Streamlit
-#st.pyplot(fig)
-
-#plt.figure(figsize=(8, 6))
-#sales_by_store.plot(kind="bar", title="Total Sales by Store", color="red")
-#plt.ylabel("Total Sales ($)")
-#plt.show()
+plt.xticks(rotation=0)
 
 # 2. Total Sales by Product
 sales_by_product = (
@@ -152,8 +126,7 @@ profit_by_category = (
     .sort_values(ascending=False)
 )
 
-#st.header("Total Profit by Category")
-#st.bar_chart(profit_by_category)
+st.header("Total Profit by Category")
 
 # Seaborn horizontal bar chart with green color
 fig, ax = plt.subplots(figsize=(8, 6))
@@ -185,32 +158,46 @@ st.pyplot(fig)
 
 
 # 4. Monthly Sales Trend Analysis
-monthly_sales = (
-    sales_data.groupby(sales_data["TransactionDate"].dt.to_period("M"))["TotalPrice"]
-    .sum()
-)
+# Assuming sales_data is already defined and loaded
+sales_data["TransactionDate"] = pd.to_datetime(sales_data["TransactionDate"])
 
-st.header("Monthly Sales Trends")
-st.bar_chart(monthly_sales)
+# Perform Monthly Sales Trend Analysis  for peak month.
+monthly_sales = sales_data.groupby(sales_data["TransactionDate"].dt.to_period("M"))["TotalPrice"].sum()
+peak_month = monthly_sales.idxmax()
+peak_sales_value = monthly_sales.max()
 
-# Using Matplotlib to create a purple line chart
+st.header("Monthly Sales Trend Analysis  for Peak Month")
+# Using Matplotlib to create a customized purple line chart
 fig, ax = plt.subplots(figsize=(10, 6))
 monthly_sales.plot(kind="line", ax=ax, color="purple", marker='o', linewidth=5)
-
-# Customize chart labels
 ax.set_title("Monthly Sales Trends")
 ax.set_xlabel("Month")
 ax.set_ylabel("Total Sales ($)")
+ax.axhline(y=peak_sales_value, color='r', linestyle='--', label=f"Peak: {peak_month}")
+ax.legend()
 ax.grid(True)
+# Show the customized chart in Streamlit
+st.pyplot(fig)
+
+st.header("Monthly Sales Trends")
+# Plot Monthly Sales Trends
+fig, ax = plt.subplots(figsize=(10, 6))
+monthly_sales.plot(kind="bar", ax=ax, color="skyblue")
+ax.set_title("Monthly Sales Trends")
+ax.set_xlabel("Month")
+ax.set_ylabel("Total Sales ($)")
+ax.grid(axis='y')
 
 # Show the customized chart in Streamlit
 st.pyplot(fig)
 
-plt.figure(figsize=(10, 6))
-monthly_sales.plot(kind="line", title="Monthly Sales Trends", color="purple")
-plt.ylabel("Total Sales ($)")
-plt.xlabel("Month")
-plt.show()
+# Plot Monthly Sales Trends
+fig, ax = plt.subplots(figsize=(10, 6))
+monthly_sales.plot(kind="bar", ax=ax, color="skyblue")
+ax.set_title("Monthly Sales Trends")
+ax.set_xlabel("Month")
+ax.set_ylabel("Total Sales ($)")
+ax.grid(axis='y')
 
 #  create a horizontal bar chart showing top-selling products
 def top_selling_products(df):
@@ -335,8 +322,7 @@ def transform_data(products, stores, transactions, transaction_details):
 # Function to analyze and visualize data
 def analyze_and_visualize(df):
     try:
-        #st.write("### Data Overview")
-        #st.write(df.head())
+        
 
         # Boxplot of numeric columns
         st.write("### Boxplot of Numeric Columns")
@@ -344,27 +330,7 @@ def analyze_and_visualize(df):
         df.boxplot(ax=ax)
         st.pyplot(fig)
 
-        # Basic statistics
-        #st.write("### Basic Statistics")
-        #st.write(df.describe())
-
-        # Checking missing values
-        #st.write("### Missing Values in Data")
-        #st.write(df.isnull().sum())
-
-        # Checking data types
-        #st.write("### Data Types")
-        #st.write(df.dtypes)
-
-        # Checking unique values
-        #st.write("### Unique Values in Data")
-        #st.write(df.nunique())
-
-        # Analyzing quantity by product
-        #st.write("### Grouping and Analyzing Quantity by Product")
-        #product_quantity_analysis = df.groupby("ProductName")["Quantity"].mean()
-        #st.write(product_quantity_analysis)
-
+        
     except Exception as e:
         st.error(f"Error during analysis and visualization: {e}")
 
@@ -391,11 +357,13 @@ def main():
 
 # Run the app
 if __name__ == "__main__":
-    main()
+ main()
 
-#  loading data from a SQLite database 
+# Repeat Customer Segmentation
+# Load data from the SQLite database
 connection = sqlite3.connect("Köksglädje.db")
-# Replace with the actual table name from the database
+
+# Fetch the data from the transactions table
 df2 = pd.read_sql("SELECT * FROM transactions", connection)
 
 # Remove spaces from column names
@@ -407,46 +375,30 @@ if "CustomerID" in df2.columns and "TransactionID" in df2.columns:
     repeat_customers = df2.groupby("CustomerID")["TransactionID"].count().reset_index()
     repeat_customers.columns = ["CustomerID", "PurchaseCount"]
 
-    # Categorizing customers into 'New' or 'Repeat' based on the PurchaseCount
-    repeat_customers["Segment"] = repeat_customers["PurchaseCount"].apply(lambda x: "Repeat" if x > 1 else "New")
+    # Filter only repeat customers (those with more than one purchase)
+    repeat_customers_only = repeat_customers[repeat_customers["PurchaseCount"] > 1]
 
-    #  title
-    st.title('Customer Purchase Segmentation')
+    # Streamlit app title
+    st.title('Repeat Customer Segmentation')
+# Plot for Repeat customers
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(repeat_customers_only["CustomerID"], repeat_customers_only["PurchaseCount"], color='lightcoral')
+    ax.set_title("Repeat Customers")
+    ax.set_xlabel("Customer ID")
+    ax.set_ylabel("Number of Purchases")
+    ax.tick_params(axis='x', rotation=90)  
 
-    # Display the first few rows of the repeat_customers DataFrame
-    #st.subheader("Customer Segmentation Data (First Few Rows)")
-    #st.write(repeat_customers.head())
-
-    # Count the number of new and repeat customers
-    new_customers = repeat_customers[repeat_customers["Segment"] == "New"]
-    repeat_customers_only = repeat_customers[repeat_customers["Segment"] == "Repeat"]
-
-    # Create a figure with two subplots (for New and Repeat)
-    fig, axes = plt.subplots(1, 2, figsize=(14, 6))
-
-    # Bar chart for New customers
-    axes[0].bar(new_customers["CustomerID"], new_customers["PurchaseCount"], color='skyblue')
-    axes[0].set_title("New Customers")
-    axes[0].set_xlabel("Customer ID")
-    axes[0].set_ylabel("Number of Purchases")
-    axes[0].tick_params(axis='x', rotation=30)  # Rotate x-axis labels for better readability
-
-    # Bar chart for Repeat customers
-    axes[1].bar(repeat_customers_only["CustomerID"], repeat_customers_only["PurchaseCount"], color='lightcoral')
-    axes[1].set_title("Repeat Customers")
-    axes[1].set_xlabel("Customer ID")
-    axes[1].set_ylabel("Number of Purchases")
-    axes[1].tick_params(axis='x', rotation=90)  # Rotate x-axis labels for better readability
-
-    # Display the plots
+    # Display the plot
     plt.tight_layout()
-    st.pyplot(fig)  
+    st.pyplot(fig)
 else:
     st.error("The required columns 'CustomerID' or 'TransactionID' are missing.")
 
+# Customer data display
     st.title(" Customers Data")
 connection = sqlite3.connect ("Köksglädje.db")
 Customers_query = """select CustomerID, JoinDate, ActiveMember, Approvedtocontact from Customers """
+ 
 try:
     df = pd.read_sql(Customers_query, connection)
 except Exception as e:
@@ -454,36 +406,23 @@ except Exception as e:
     raise
 finally:
     connection.close()
+ 
 if "JoinDate" in df.columns:
     st.write(df['JoinDate'].info())
-df['JoinDate']=pd.to_datetime(df['JoinDate'],errors='coerce')
-radio_button=st.radio("Do i want to see the Graph?", options= ["yes","No"])
+   
+ 
+    df['JoinDate']=pd.to_datetime(df['JoinDate'],errors='coerce')
+   
+    radio_button=st.radio("Do i want to see the Graph?", options= ["yes","No"])
+ 
 if radio_button== "yes":
-
+ 
     fig, ax= plt.subplots(figsize=(10,5))
-ax.set(title='Customers Data Display')
-ax.set_xlabel('JoinDate')
-ax.bar(x=df['JoinDate'],height=df['CustomerID'],color='green')
+   
+    ax.set(title='Customers Data Display')
+    ax.set_xlabel('JoinDate')
+    ax.bar(x=df['JoinDate'],height=df['CustomerID'],color='green')
  
-plt.xticks(rotation=45,ha='right')
-plt.tight_layout()
-st.pyplot(fig)
-
-st.title(" Here you can see TransactionsDetails highest maxprice")
-connection = sqlite3.connect ("Köksglädje.db")
-transactionDetail_query = """select TotalPrice from TransactionDetails"""
-df= pd.read_sql(transactionDetail_query, connection)
-max_TotalPrice = df['TotalPrice'].max()
-st.write(max_TotalPrice)
-connection.close()
- 
- 
-
-
-
-    
- 
-
-
-
-
+    plt.xticks(rotation=45,ha='right')
+    plt.tight_layout()
+    st.pyplot(fig)
