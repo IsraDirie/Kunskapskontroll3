@@ -1,15 +1,60 @@
-# Kunskapskontroll3
+Köksglädje
 
-This repository contains the necessary files for the assignment. It has been set as a public repository as required by the assignment, allowing anyone to download the files locally by using the github URL. The files can be executed using the Visual Studio Code editor with Python and Jupyter plugin extensions. The output also is visualized graphically using Streamlit framework. 
+our project is about how to analys, transform and read data
+In this project it has five tables where one is Customers , Product , Transactions, TransactionDetails , Stores.
+In customers there are four columns one is active member, the other is approved to contact, join date and there last one is customer id.
+The next tabel which the name of it is product has six columns where one is productId , Productname, descriptions, categoryname, price, cost price.
+the third tabel is stores where the columns are storeId, store names and last one is location
+ther fourth is transaction details where one columns  are transactiondetaileid, transactionId, productid , quantity, price at purchase, total price
+Last but not least is the transaction tabel which the columns begins with transactionid , storeid, customerid and the last one is transaction date.
+if you want to check it you can find it in this database here just click on the repository ("Köksglädje.db"). What we used is Api scheduling time where we laid our project by creating, updating and deleting and improving.
 
-**Description**
-This repository is to store the exercises given for kunskapskontroll 3
+Here is one of the koding where i was very proud of doing
 
-Here are the details of the files in this repository:  
-- **Kunskapskontroll 3.ipynb** - Jupyter notebook file which has the complete step by step coding which contains how to load the database and then reading the data, analyze, transform from it.
-- **app.py** - Python code for this project, which has been created out of the Jupyter notebook. Then it has the added support for Streamlit framework statements, which enables to see the output visually on Streamlit web page.
-- **Köksglädje.db** - Main database for this assignment
-- **StreamlitOutput.pdf** - Streamlit output report for visualization which includes different graphs also.
-- **README.md** - Readme file for this github repository 
+connection = sqlite3.connect (r"C:\Users\israd\Data science\Köksglädje.db")
+
+query = """select Stores.StoreName,TransactionDetails.Totalprice
+from Stores
+Join TransactionDetails on Stores.StoreID = TransactionDetails.TransactionID """
+
+try:
+    df = pd.read_sql(query, connection)
+    print(" Stores on go!")
+except Exception as e:
+    print ("Data doesn't work:",e)
+    raise
+finally:
+        connection.close()
+if "StoreName" in df.columns and "TotalPrice" in df.columns:
+     df['TotalPrice'] = df['TotalPrice'].astype(float)
+   
+     print("Stores is working")
+     print("StoreName info:")
+     print(df["StoreName"].info())
+else:
+    print('Data is not working')
+    print(df.head())
+   
+fig, ax = plt.subplots(figsize=(10,5))
+df.plot(
+x='StoreName',
+y='TotalPrice',
+kind='bar',
+title='Stores',
+ax=ax,
+color='green'
+)
+
+plt.xticks(rotation=45, ha= 'right')
+plt.yticks()
+plt.tight_layout()
+plt.show()
+
+print(df.head())
+print(df.info())  
+
+what the graph is about how to analys Stores Names  and Total price. What you need to install for this project are (import streamlit as st ,import numpy as np,import matplotlib.pyplot as plt, import sqlite3, import pandas as pd, import seaborn as sns ) and make sure you do this so your koding can work.
+
+
 
 
