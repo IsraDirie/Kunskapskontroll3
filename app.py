@@ -7,7 +7,7 @@ import seaborn as sns
 
 ###1. Läsa in data från en SQL-databas (Load data from an SQL database)
 connection = sqlite3.connect("Köksglädje.db")
-
+st.subheader("Köksglädje Database Analysis")
 # Create connection to database file
 st.subheader("Products")
 products_query = "SELECT * FROM Products;"
@@ -155,7 +155,6 @@ ax.set_ylabel("Total Profit ($)")
 
 # Show the plot in Streamlit
 st.pyplot(fig)
-
 
 # 4. Monthly Sales Trend Analysis
 # Assuming sales_data is already defined and loaded
@@ -322,15 +321,11 @@ def transform_data(products, stores, transactions, transaction_details):
 # Function to analyze and visualize data
 def analyze_and_visualize(df):
     try:
-        
-
         # Boxplot of numeric columns
         st.write("### Boxplot of Numeric Columns")
         fig, ax = plt.subplots(figsize=(15, 10))
         df.boxplot(ax=ax)
         st.pyplot(fig)
-
-        
     except Exception as e:
         st.error(f"Error during analysis and visualization: {e}")
 
@@ -409,20 +404,122 @@ finally:
  
 if "JoinDate" in df.columns:
     st.write(df['JoinDate'].info())
+df['JoinDate']=pd.to_datetime(df['JoinDate'],errors='coerce')
    
- 
-    df['JoinDate']=pd.to_datetime(df['JoinDate'],errors='coerce')
-   
-    radio_button=st.radio("Do i want to see the Graph?", options= ["yes","No"])
- 
+radio_button=st.radio("Do i want to see the Graph?", options= ["yes","No"])
+
 if radio_button== "yes":
+ st.header("Customers Data Display")
+ fig, ax= plt.subplots(figsize=(10,5))
+ax.set(title='Customers Data Display')
+ax.set_xlabel('JoinDate')
+ax.bar(x=df['JoinDate'],height=df['CustomerID'],color='green')
+plt.xticks(rotation=45,ha='right')
+plt.tight_layout()
+st.pyplot(fig)
+
+st.title("Stores and TransactionDetail Data")
  
-    fig, ax= plt.subplots(figsize=(10,5))
+connection = sqlite3.connect ("Köksglädje.db")
+ 
+query = """select Stores.StoreName,TransactionDetails.Totalprice
+from Stores
+Join TransactionDetails on Stores.StoreID = TransactionDetails.TransactionID """
+ 
+try:
+    df = pd.read_sql(query, connection)
+except Exception as e:
+    st.write ("Data doesn't work:",e)
+    raise
+finally:
+        connection.close()
+ 
+if  "StoreName" in df.columns and "TotalPrice" in df.columns:
+     df['TotalPrice'] = df['TotalPrice'].astype(float)
+ 
+radio_button = st.radio("Do i want to see the Graph?",options=("Yes" ," No"))
+                       
+if radio_button == "Yes":
+ 
+  st.write(df["StoreName"].info())
    
-    ax.set(title='Customers Data Display')
-    ax.set_xlabel('JoinDate')
-    ax.bar(x=df['JoinDate'],height=df['CustomerID'],color='green')
+fig, ax = plt.subplots(figsize=(10,5))
+df.plot(
+x='StoreName',
+y='TotalPrice',
+kind='bar',
+title='Stores',
+ax=ax,
+color='green'
+)
+ 
+plt.xticks(rotation=45, ha= 'right')
+plt.yticks()
+plt.tight_layout()
+st.pyplot(fig)
+
+st.title("Transactions and TotalPrice")
+ 
+connection = sqlite3.connect ("Köksglädje.db")
+ 
+query = """ SELECT Transactions.TransactionDate, TransactionDetails.TotalPrice
+from Transactions
+Join  TransactionDetails on Transactions.TransactionID = TransactionDetails.TransactionID """
+ 
+try:
+    df = pd.read_sql(query, connection)
+except Exception as e:
+    st.write("Data doesn't work:",e)
+finally:
+    connection.close()
+   
+if "TransactionDate" in df.columns and "TotalPrice" in df.columns:
+    df['TransactionDate'] = pd.to_datetime(df['TransactionDate'], errors='coerce')
+    df['TotalPrice'] = df['TotalPrice'].astype(float)
+ 
+    result = df.groupby(['TransactionDate']).sum()
+    result = result.reset_index()
+ 
+ 
+    radio_button = st.radio("Do i want to see the Graph?",options=("Yes","No"))
+ 
+if radio_button == "Yes":
+ 
+    fig, ax = plt.subplots(figsize=(10,5))
+ 
+    ax.set(title='Transactions & Graph')
+    ax.set_xlabel('TransactionDate')
+    ax.set_ylabel('Totalprice')
+ 
+    ax.plot(result['TransactionDate'], result['TotalPrice'], color='green')
  
     plt.xticks(rotation=45,ha='right')
     plt.tight_layout()
     st.pyplot(fig)
+ 
+  # Detta är största Totalprice i transaction Details
+ 
+st.title(" Here you can see TransactionsDetails highest maxprice")
+ 
+connection = sqlite3.connect ("Köksglädje.db")
+ 
+transactionDetail_query = """select TotalPrice from TransactionDetails"""
+ 
+df= pd.read_sql(transactionDetail_query, connection)
+ 
+max_TotalPrice = df['TotalPrice'].max()
+ 
+st.write(max_TotalPrice)
+ 
+connection.close()
+ 
+ 
+
+
+
+    
+ 
+
+
+
+
