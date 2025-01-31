@@ -1,7 +1,7 @@
 Köksglädje
 
 our project is about how to analys, transform and read data
-In this project it has five tables where one is customers , product , transactions, transactionDetails , stores.
+In this project it has five tables where one is customers , products , transactions, transactionDetails , stores.
 In customers there are four columns one is active member, the other is approved to contact, join date and last one is customer id.
 The next tabel which the name of it is product has six columns where one is productId , productname, descriptions, categoryname, price, costprice.
 the third tabel is stores where the columns are storeId, store names and last one is location
