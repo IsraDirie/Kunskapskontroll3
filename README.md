@@ -3,10 +3,10 @@ Köksglädje
 our project is about how to analys, transform and read data
 In this project it has five tables where one is customers , products , transactions, transactionDetails , stores.
 In customers there are four columns one is active member, the other is approved to contact, join date and last one is customer id.
-The next tabel which the name of it is product has six columns where one is productId , productname, descriptions, categoryname, price, costprice.
-the third tabel is stores where the columns are storeId, store names and last one is location
+The next table which the name of it is product has six columns where one is productId , productname, descriptions, categoryname, price, costprice.
+the third table is stores where the columns are storeId, store names and last one is location
 the fourth is transaction details where one columns  are transactiondetaileid, transactionId, productid , quantity, price at purchase, total price
-Last but not least is the transaction tabel which the columns begins with transactionid , storeid, customerid and the last one is transaction date.
+Last but not least is the transaction table which the columns begins with transactionid , storeid, customerid and the last one is transaction date.
 if you want to check it you can find it in this database here just click on the repository ("Köksglädje.db"). What we used is Api scheduling time where we laid our project by creating, updating and deleting and improving.
 
 Here is one of the koding where i was very proud of doing
